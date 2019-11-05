@@ -1,45 +1,43 @@
-from ..types import GLSLVector
-from ..utils import isValid, isVec
+from ..types import GLSLVector 
+from ..utils import is_vector
 
 def vec2(x, y=None):
-    if not isValid(y):
+    if y is None:
         return GLSLVector([x, x])
 
     return GLSLVector([x, y])
 
 def vec3(x, y=None, z=None):
-    if isValid(y) and isValid(z):
+    if not x is None and not z is None:
         return GLSLVector([x, y, z])
-    elif isValid(y):
-        if isVec(x):
+    elif not y is None:
+        if is_vector(x):
             return GLSLVector(x.coords + [y])
-        elif isVec(y):
+        elif is_vector(y):
             return GLSLVector([x] + y.coords)
 
-    if not isValid(y) and not isValid(z):
+    if y is None and z is None:
         return GLSLVector([x, x, x])
 
 def vec4(x, y=None, z=None, w=None):
-    print(str(x))
-    print(str(y))
-    if isValid(y) and isValid(z) and isValid(w):
+    if not y is None and not z is None and not w is None:
         return GLSLVector([x, y, z, w])
 
-    if isValid(y) and isValid(z):
-        if isVec(x):
+    if not y is None and not z is None:
+        if is_vector(x):
             return GLSLVector(x.coords + [y, z])
-        elif isVec(y):
+        elif is_vector(y):
             return GLSLVector([x] + y.coords + [z])
-        elif isVec(z):
+        elif is_vector(z):
             return GLSLVector([x, y] + z.coords)
 
-    if isValid(y):
-        if isVec(x) and isVec(y):
+    if not y is None:
+        if is_vector(x) and is_vector(y):
             return GLSLVector(x.coords + y.coords)
-        elif isVec(x):
+        elif is_vector(x):
             return GLSLVector(x.coords + [y])
-        elif isVec(y):
+        elif is_vector(y):
             return GLSLVector([x] + y.coords)
 
-    if not isValid(y) and not isValid(z) and not isValid(w):
+    if y is None and z is None and w is None:
         return GLSLVector([x, x, x, x])

@@ -50,7 +50,7 @@ from glsl import *
 
 ABS = abs
 
-def march(res, isolevel, start, end, de):
+def march(res, isolevel, start, end, name, de, stop_event):
     print("start calculation of isosurface")
 
 #change this part to create your own surfaces
@@ -67,7 +67,7 @@ def march(res, isolevel, start, end, de):
 ###############################################
 
     start = time.time()
-    isosurface(p0,p1,resolution,isolevel,scalarfield)
+    isosurface(p0, p1, resolution, isolevel, name, scalarfield, stop_event)
     elapsed = time.time()-start
     print("end test %r"%elapsed)
 
@@ -413,18 +413,19 @@ def polygonise(cornervalues, isolevel, x1, y1, z1, x2, y2, z2):
     return triangles
 
 def vertexinterp(isolevel,p1,p2,valp1,valp2):
-   if (ABS(isolevel-valp1) < 0.00001):
-      return p1
-   if (ABS(isolevel-valp2) < 0.00001):
-      return p2
-   if (ABS(valp1-valp2) < 0.00001):
-      return p1
-   mu = (isolevel - valp1) / (valp2 - valp1);
-   x = p1[0] + mu * (p2[0] - p1[0]);
-   y = p1[1] + mu * (p2[1] - p1[1]);
-   z = p1[2] + mu * (p2[2] - p1[2]);
+    if (ABS(isolevel-valp1) < 0.00001):
+        return p1
+    if (ABS(isolevel-valp2) < 0.00001):
+        return p2
+    if (ABS(valp1-valp2) < 0.00001):
+        return p1
 
-   return x,y,z
+    mu = (isolevel - valp1) / (valp2 - valp1)
+    x = p1[0] + mu * (p2[0] - p1[0])
+    y = p1[1] + mu * (p2[1] - p1[1])
+    z = p1[2] + mu * (p2[2] - p1[2])
+
+    return x,y,z
 
 def create_mesh_for(objname,verts,faces):
     me = bpy.data.meshes.new(objname)  # create a new mesh
@@ -437,9 +438,7 @@ def create_mesh_for(objname,verts,faces):
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.01)
     bm.to_mesh(me)
 
-    ob = bpy.data.objects.new(objname,me) # create a new object
-    ob.data = me          # link the mesh data to the object
-    return ob
+    return me
 
 def creategeometry(verts):
     faces=[]
@@ -453,18 +452,31 @@ def creategeometry(verts):
             faceoffset+=3
     return list(chain.from_iterable(verts)),faces
 
-def make_object_in_scene(verts, scene):
+def update_mesh_for_object(ob, verts):
+    old_mesh_name = ob.data.name
+    verts, faces = creategeometry(verts)
+    ob.data = create_mesh_for(ob.data.name, verts, faces)
+
+    om = bpy.data.meshes.get(old_mesh_name)
+    bpy.data.meshes.remove(om, do_unlink=True)
+
+
+def make_object_in_scene(objname, verts, scene):
     verts,faces=creategeometry(verts)
-    block=create_mesh_for("block",verts,faces)
+    me = create_mesh_for(objname,verts,faces)
+    ob = bpy.data.objects.new(objname,me) # create a new object
 
-    scene.objects.link(block)
-    selectobj(block)
+    scene.objects.link(ob)
+    selectobj(ob)
 
-    return block
+    return ob
 
-def remove_object_in_scene():
+def remove_objects_in_scene():
     for o in bpy.data.objects:
-        bpy.data.objects.remove(o, do_unlink=True)
+        if o.type == "MESH":
+            mesh = bpy.data.meshes.get(o.data.name)
+            bpy.data.meshes.remove(mesh, do_unlink=True)
+            bpy.data.objects.remove(o, do_unlink=True)
 
 def selectobj(obj):
     for o2 in bpy.context.scene.objects:
@@ -491,7 +503,7 @@ def cornerloop(x,y,z):
         for cy,cx in zip((0,y,y,0),(0,0,x,x)):
              yield cx,cy,cz
 
-def isosurface(p0,p1,resolution,isolevel,isofunc):
+def isosurface(p0,p1,resolution,isolevel,name,isofunc, stop_event):
     r=[(x1-x0)/sw for x0,x1,sw in zip(p0,p1,resolution)]
 
     triangles=[]
@@ -502,10 +514,15 @@ def isosurface(p0,p1,resolution,isolevel,isofunc):
 
     cornervalues = [0]*8
 
+    remove_objects_in_scene()
+    ob = make_object_in_scene('progress', triangles, bpy.context.scene)
+
     for z in arange(p0[2], p1[2], r[2]):
+        if stop_event.is_set():
+            break
+
         z2 = z + r[2]
         z_plane_b = [ [ isofunc([x,y, z2]) for y in arange(p0[1], p1[1], r[1])] for x in arange(p0[0], p1[0], r[0])]
-        remove_object_in_scene()
         for yi in range(len(z_plane_a[0]) -1):
             y = p0[1]+yi*r[1]
             y2 = y + r[1]
@@ -528,7 +545,7 @@ def isosurface(p0,p1,resolution,isolevel,isofunc):
 
                 triangles.extend(polygonise(cornervalues, isolevel, x,y,z, x2, y2, z2))
         z_plane_a = z_plane_b
-        make_object_in_scene(triangles, bpy.context.scene)
+        update_mesh_for_object(ob, triangles)
 
-    remove_object_in_scene()
-    return make_object_in_scene(triangles, bpy.context.scene)
+    remove_objects_in_scene()
+    return make_object_in_scene(name, triangles, bpy.context.scene)
