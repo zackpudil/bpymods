@@ -41,7 +41,7 @@ class GLSLMatrix(GLSLType):
             els = [sum((x*y).coords) for x in self.transpose().cols for y in m.cols]
 
             if is_matrix(m):
-                return GLSLMatrix(els)
+                return GLSLMatrix(els).transpose()
             else:
                 return GLSLVector(els)
         else:

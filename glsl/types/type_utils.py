@@ -1,5 +1,11 @@
-from .glsl_vector import GLSLVector
+from ..types import GLSLVector, GLSLMatrix
+from ..utils import is_matrix, is_vector
 
-def gen_type(a):
-    return GLSLVector(a) if isinstance(a, list) and len(a) >= 2 else a
+def gen_type(vs, r):
+    if any([is_matrix(v) for v in vs]):
+        return GLSLMatrix(r)
+    elif any([is_vector(v) for v in vs]):
+        return GLSLVector(r)
+    else:
+        return r
 
