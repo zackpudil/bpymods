@@ -1,4 +1,4 @@
-from ..types import GLSLVector, gen_type
+from ..types import gen_type
 from ..utils import reduce_exec_to_comps
 
 def clamp(v, a, b):
