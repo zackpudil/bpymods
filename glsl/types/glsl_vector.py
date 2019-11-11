@@ -1,8 +1,9 @@
 from .glsl_type import GLSLType
 from ..utils import reduce_exec_to_comps, is_matrix
 
+
 class GLSLVector(GLSLType):
-    coords = []
+    coordinates = []
 
     names = {
         'x': 0,
@@ -16,32 +17,32 @@ class GLSLVector(GLSLType):
     }
 
     @property
-    def cols(self):
+    def columns(self):
         return [self.transpose()]
 
-    def __init__(self, coords):
-        self.coords = coords
+    def __init__(self, coordinates):
+        self.coordinates = coordinates
 
     def __str__(self):
-        params = [str(c) for c in self.coords]
-        return "vec{0}({1})".format(str(len(self.coords)), ','.join(params))
+        params = [str(c) for c in self.coordinates]
+        return "vec{0}({1})".format(str(len(self.coordinates)), ','.join(params))
 
     def __getattr__(self, attr):
-        nv = [self.coords[self.names.get(c)] for c in list(attr)]
+        nv = [self.coordinates[self.names.get(c)] for c in list(attr)]
 
         return nv.pop() if len(nv) == 1 else GLSLVector(nv)
 
     def __setattr__(self, attr, value):
-        if attr == "coords":
+        if attr == "coordinates":
             super().__setattr__(attr, value)
             return
 
         s = list(attr)
         for i in range(0, len(s)):
-            self.coords[self.names.get(s[i])] = value if len(s) == 1 else value.coords[i]
+            self.coordinates[self.names.get(s[i])] = value if len(s) == 1 else value.coordinates[i]
 
     def transpose(self):
-        return GLSLVector(self.coords)
+        return GLSLVector(self.coordinates)
 
     def add(self, v):
         return GLSLVector(reduce_exec_to_comps((self, v), lambda a, b: a + b))
@@ -63,7 +64,7 @@ class GLSLVector(GLSLType):
         return GLSLVector(reduce_exec_to_comps((self, v), lambda a, b: a / b))
 
     def neg(self):
-        return GLSLVector([-c for c in self.coords])
+        return GLSLVector([-c for c in self.coordinates])
 
     def abs(self):
-        return GLSLVector([abs(c) for c in self.coords])
+        return GLSLVector([abs(c) for c in self.coordinates])
