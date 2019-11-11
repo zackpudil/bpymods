@@ -1,10 +1,9 @@
 from math import sqrt
 from functools import reduce
-from itertools import chain
 
 from .glsl_type import GLSLType
 from .glsl_vector import GLSLVector
-from ..utils import reduce_exec_to_comps, is_matrix, is_vector, is_glsl_type
+from ..utils import reduce_exec_to_comps, is_matrix, is_glsl_type
 
 
 class GLSLMatrix(GLSLType):
@@ -12,7 +11,7 @@ class GLSLMatrix(GLSLType):
 
     @property
     def coordinates(self):
-        return list(reduce(lambda x, y: chain(x, y.coordinates), self.columns, []))
+        return list(reduce(lambda x, y: x + y.coordinates, self.columns, []))
 
     def __init__(self, elements):
         row_len = int(sqrt(len(elements)))
@@ -25,7 +24,7 @@ class GLSLMatrix(GLSLType):
     def transpose(self):
         vs = [GLSLVector([v.coordinates[i] for v in self.columns]) for i in range(0, len(self.columns))]
 
-        return GLSLMatrix(list(reduce(lambda x, y: chain(x, y.coordinates), vs, [])))
+        return GLSLMatrix(list(reduce(lambda x, y: x + y.coordinates, vs, [])))
 
     def add(self, m):
         return GLSLMatrix(reduce_exec_to_comps((self, m), lambda x, y: x + y))
