@@ -9,6 +9,7 @@ import bmesh
 class EdgeSpinner:
     ignore_indexes = []
     iteration = 0
+    passes = 0
     triangle_size = 0.1
     sdf = None
 
@@ -31,6 +32,9 @@ class EdgeSpinner:
             return first_pass[0]
 
         self.ignore_indexes = []
+        self.iteration = 0
+        self.passes += 1
+
         second_pass = [e for e in edges if e.is_boundary]
         if len(second_pass) != 0:
             second_pass[0].select = True
@@ -123,4 +127,4 @@ class EdgeSpinner:
 
     def next(self):
         self.iteration += 1
-        print(self.iteration, len(self.ignore_indexes))
+        print(self.passes, self.iteration, len(self.ignore_indexes))
