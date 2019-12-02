@@ -17,8 +17,8 @@ def trace_surface(ro, rd, sdf, ts, ep=0.0001):
 
 
 def get_surface_point(sdf):
-    ro = Vector([0.0, -3, 0.0])
-    rd = Vector([0, 1, 0]).normalized()
+    ro = Vector([0.0, 0, -3])
+    rd = Vector([0, 0, 1]).normalized()
     return trace_surface(ro, rd, sdf, 0)
 
 
