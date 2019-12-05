@@ -2,7 +2,7 @@ import re
 from functools import reduce
 
 def compile_glsl_to_python(glsl_code):
-    lines = re.split('(;|\{)', glsl_code)
+    lines = re.split('(;|{)', glsl_code)
     lines = reduce(lambda acc, el: acc[:-1] + [acc[-1] + el] if ';' in el or '{' in el else acc + [el], lines, [])
 
     new_lines = []

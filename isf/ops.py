@@ -16,4 +16,4 @@ def smooth_min(a, b, k):
 
 def smooth_max(a, b, k):
     h = max(k - abs(a - b), 0.0)/k
-    return max(a, b) - h*h*k*(1/4)
+    return max(a, b) + h*h*k*(1/4)
