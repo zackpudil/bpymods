@@ -2,7 +2,7 @@ from glsl import to_glsl_vector
 from mathutils import Vector
 
 
-def trace_surface(ro, rd, sdf, ts, ep=0.0001):
+def trace_surface(ro, rd, sdf, ts=0, ep=0.0001):
     t = 0
     for i in range(0, 200):
         d = sdf(to_glsl_vector(ro + rd * t))
@@ -13,13 +13,7 @@ def trace_surface(ro, rd, sdf, ts, ep=0.0001):
     if ts == 0:
         raise Exception('Cannot find initial surface point')
 
-    return ro + rd * (ts / 8.0)
-
-
-def get_surface_point(sdf):
-    ro = Vector([0.0, 0, -3])
-    rd = Vector([0, 0, 1]).normalized()
-    return trace_surface(ro, rd, sdf, 0)
+    return ro + rd * (ts / 4.0)
 
 
 def get_normal(p, sdf):

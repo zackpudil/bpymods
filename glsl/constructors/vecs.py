@@ -20,7 +20,10 @@ def __vec__(elements, vec_len):
     if len(elements) == vec_len:
         return GLSLVector(list(elements))
     elif len(elements) == 1:
-        return GLSLVector([elements[0]] * vec_len)
+        if is_vector(elements[0]):
+            return GLSLVector(elements[0].coordinates[:])
+        else:
+            return GLSLVector([elements[0]] * vec_len)
     else:
         coordinates = [x.coordinates if is_vector(x) else [x] for x in elements]
         return GLSLVector(list(reduce(lambda x, y: x + y, coordinates, [])))

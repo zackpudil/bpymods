@@ -2,7 +2,7 @@ from mathutils import Vector
 
 from numpy import arange
 from bpy_polly import get_verts_from_linked_faces, is_face_overlapping_others, is_point_in_triangles
-from isf import trace_surface, get_normal, get_surface_point, get_tangent
+from isf import trace_surface, get_normal, get_tangent
 import bmesh
 
 
@@ -42,7 +42,7 @@ class EdgeSpinner:
 
         raise Exception('We done?')
 
-    def get_initial_point(self, s, triangle_size):
+    def extrude_point_from_edge(self, s, triangle_size):
         edge_cos = [v.co for v in self.active_edge.verts]
 
         vinit = [fe for fe in self.active_edge.link_faces[0].verts if fe.co not in edge_cos]
@@ -56,7 +56,7 @@ class EdgeSpinner:
 
         pinit = Vector.Fill(3)
         for i in arange(0, self.triangle_size, self.triangle_size / 8.0).tolist():
-            pinit = self.get_initial_point(s, self.triangle_size - i)
+            pinit = self.extrude_point_from_edge(s, self.triangle_size - i)
             pinit = trace_surface(pinit, -get_normal(pinit, self.sdf), self.sdf, self.triangle_size - i)
 
             snormal = get_normal(s, self.sdf)
@@ -107,8 +107,8 @@ class EdgeSpinner:
 
         return bm
 
-    def add_initial_face(self, bm):
-        p0 = get_surface_point(self.sdf)
+    def add_initial_face(self, bm, init_ro, init_rd):
+        p0 = trace_surface(init_ro, init_rd, self.sdf)
 
         normal = get_normal(p0, self.sdf)
         tangent = get_tangent(normal)

@@ -3,7 +3,7 @@ import bmesh
 import logging
 
 from .logic import EdgeSpinner
-from .overrides import override_implicit_surface, TRIANGLE_SIZE
+from .overrides import override_implicit_surface, TRIANGLE_SIZE, RAY_ORIGIN, RAY_DIRECTION
 
 
 class EdgeSpinnerOperator(bpy.types.Operator):
@@ -68,7 +68,7 @@ class EdgeSpinnerOperator(bpy.types.Operator):
             self.bm = bmesh.from_edit_mesh(self.mesh)
 
             self.edge_spinner = EdgeSpinner(override_implicit_surface, TRIANGLE_SIZE)
-            self.bm = self.edge_spinner.add_initial_face(self.bm)
+            self.bm = self.edge_spinner.add_initial_face(self.bm, RAY_ORIGIN, RAY_DIRECTION)
 
             bmesh.update_edit_mesh(self.mesh)
 

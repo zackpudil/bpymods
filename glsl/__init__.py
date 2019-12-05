@@ -3,6 +3,7 @@ from mathutils import Vector
 from .types import *
 from .constructors import *
 from .operations import *
+from .compiler import *
 
 
 def to_glsl_vector(v):
