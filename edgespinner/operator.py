@@ -58,10 +58,10 @@ class EdgeSpinnerOperator(bpy.types.Operator):
 
             self.mesh = bpy.data.meshes.new('MarchingTriangles')
             self.object = bpy.data.objects.new('MarchingTriangles', self.mesh)
-            context.scene.objects.link(self.object)
+            context.collection.objects.link(self.object)
 
-            self.object.select = True
-            context.scene.objects.active = self.object
+            self.object.select_set(True)
+            context.view_layer.objects.active = self.object
 
             bpy.ops.object.mode_set(mode='EDIT')
 
